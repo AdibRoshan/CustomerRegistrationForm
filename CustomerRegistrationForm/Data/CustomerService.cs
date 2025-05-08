@@ -1,30 +1,32 @@
-﻿using CustomerRegistrationForm.Model;
+﻿using CustomerRegistrationForm.Interface;
+using CustomerRegistrationForm.Model;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace CustomerRegistrationForm.Data
     {
-    public class CustomerRepository
+    public class CustomerService : IService
         {
         private readonly string _connectionString;
 
-        public CustomerRepository ( string connectionString )
+        public CustomerService ( string connectionString )
             {
             _connectionString = connectionString;
             }
 
-        public List<Customer> GetAll ( )
+        public async Task<List<Customer>> GetAllAsync ( )
             {
             var customers = new List<Customer> ( );
             try
                 {
                 using ( var connection = new SqlConnection ( _connectionString ) )
                     {
-                    connection.Open ( );
+                    await connection.OpenAsync ( );
                     using ( var command = new SqlCommand ( "SELECT * FROM Customers" , connection ) )
                         {
-                        using ( var reader = command.ExecuteReader ( ) )
+                        using ( var reader = await command.ExecuteReaderAsync ( ) )
                             {
-                            while ( reader.Read ( ) )
+                            while ( await reader.ReadAsync ( ) )
                                 {
                                 customers.Add ( new Customer
                                     {
@@ -53,19 +55,19 @@ namespace CustomerRegistrationForm.Data
             return customers;
             }
 
-        public Customer GetById ( int id )
+        public async Task<Customer> GetByIdAsync ( int id )
             {
             try
                 {
                 using ( var connection = new SqlConnection ( _connectionString ) )
                     {
-                    connection.Open ( );
+                    await connection.OpenAsync ( );
                     using ( var command = new SqlCommand ( "SELECT * FROM Customers WHERE Id = @Id" , connection ) )
                         {
                         command.Parameters.AddWithValue ( "@Id" , id );
-                        using ( var reader = command.ExecuteReader ( ) )
+                        using ( var reader = await command.ExecuteReaderAsync ( ) )
                             {
-                            if ( reader.Read ( ) )
+                            if ( await reader.ReadAsync ( ) )
                                 {
                                 return new Customer
                                     {
@@ -93,13 +95,13 @@ namespace CustomerRegistrationForm.Data
                 }
             }
 
-        public void Add ( Customer customer )
+        public async Task AddAsync ( Customer customer )
             {
             try
                 {
                 using ( var connection = new SqlConnection ( _connectionString ) )
                     {
-                    connection.Open ( );
+                    await connection.OpenAsync ( );
                     using ( var command = new SqlCommand (
                         "INSERT INTO Customers (FirstName, LastName, Email, Phone, DateOfBirth, Address, EmployerName, JobTitle, Salary, EmploymentStartDate) " +
                         "VALUES (@FirstName, @LastName, @Email, @Phone, @DateOfBirth, @Address, @EmployerName, @JobTitle, @Salary, @EmploymentStartDate); " +
@@ -116,7 +118,7 @@ namespace CustomerRegistrationForm.Data
                         command.Parameters.AddWithValue ( "@Salary" , customer.Salary );
                         command.Parameters.AddWithValue ( "@EmploymentStartDate" , customer.EmploymentStartDate );
 
-                        customer.Id = Convert.ToInt32 ( command.ExecuteScalar ( ) );
+                        customer.Id = Convert.ToInt32 ( await command.ExecuteScalarAsync ( ) );
                         }
                     }
                 }
@@ -126,13 +128,13 @@ namespace CustomerRegistrationForm.Data
                 }
             }
 
-        public Customer Update ( Customer customer )
+        public async Task<Customer> UpdateAsync ( Customer customer )
             {
             try
                 {
                 using ( var connection = new SqlConnection ( _connectionString ) )
                     {
-                    connection.Open ( );
+                    await connection.OpenAsync ( );
                     using ( var command = new SqlCommand (
                         @"UPDATE Customers SET 
                         FirstName = @FirstName, 
@@ -159,7 +161,7 @@ namespace CustomerRegistrationForm.Data
                         command.Parameters.AddWithValue ( "@EmploymentStartDate" , customer.EmploymentStartDate );
                         command.Parameters.AddWithValue ( "@Id" , customer.Id );
 
-                        command.ExecuteNonQuery ( );
+                        await command.ExecuteNonQueryAsync ( );
                         }
                     }
                 }
@@ -170,17 +172,17 @@ namespace CustomerRegistrationForm.Data
             return customer;
             }
 
-        public void Delete ( int id )
+        public async Task DeleteAsync ( int id )
             {
             try
                 {
                 using ( var connection = new SqlConnection ( _connectionString ) )
                     {
-                    connection.Open ( );
+                    await connection.OpenAsync ( );
                     using ( var command = new SqlCommand ( "DELETE FROM Customers WHERE Id = @Id" , connection ) )
                         {
                         command.Parameters.AddWithValue ( "@Id" , id );
-                        command.ExecuteNonQuery ( );
+                        await command.ExecuteNonQueryAsync ( );
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 using CustomerRegistrationForm.Data;
+using CustomerRegistrationForm.Interface;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,8 +31,13 @@ builder.Services.AddSwaggerGen( c =>
         } );
 } );
 
-builder.Services.AddSingleton<CustomerRepository> ( new CustomerRepository (
-    builder.Configuration.GetConnectionString ( "DefaultConnection" ) ) );
+//builder.Services.AddSingleton<CustomerService> ( new CustomerService (
+//    builder.Configuration.GetConnectionString ( "DefaultConnection" ) ) );
+
+builder.Services.AddScoped<IService , CustomerService> ( service =>
+{
+    return new CustomerService ( builder.Configuration.GetConnectionString ( "DefaultConnection" ) );
+} );
 
 var app = builder.Build();
 
