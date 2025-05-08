@@ -1,0 +1,18 @@
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 100px;
+  height: 500px;
+  border: 2px solid black;
+}
+
+.form_box{
+  margin-bottom: 20px;
+}
+.labelBox{
+  padding: 20px;
+   width:400px;
+   background-color: antiquewhite;
+
+}
